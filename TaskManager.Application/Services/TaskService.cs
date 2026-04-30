@@ -26,6 +26,22 @@ namespace TaskManager.Application.Services
             return task.Id;
         }
 
+        // Em cenários onde a API precisa atender listagens para UI (ex: tabelas com paginação),
+        // seria possível evoluir esse método para um padrão mais completo de filtro dinâmico.
+        //
+        // Em outro projeto, implementei um BaseApplicationService com suporte a:
+        // - Paginação
+        // - Ordenação dinâmica
+        // - Filtros por múltiplos campos (incluindo enums, datas e objetos)
+        //
+        // Exemplo:
+        // FilterAsync(GenericTableFilterDto filter) → retorna TableView<T>
+        // contendo lista + total de registros.
+        //
+        // Isso permite integração direta com componentes de UI (ex: tabelas do Ant Design),
+        // mantendo a lógica de consulta centralizada e reutilizável.
+        //
+        // Neste projeto, mantive a implementação simples (filtros básicos por parâmetro) como o desafio pedia :)
         public async Task<IEnumerable<TaskResponseDto>> GetAllAsync(TaskStatusEnum? status, DateTime? dueDate)
         {
             var tasks = await _repository.GetAllAsync(status, dueDate);
