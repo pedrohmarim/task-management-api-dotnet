@@ -1,12 +1,13 @@
 # 🚀 Task Management API (.NET 8)
 
-API RESTful para gerenciamento de tarefas (ToDo), desenvolvida com foco em **DDD (Domain-Driven Design)**, **Clean Architecture** e boas práticas de engenharia de software.
+API RESTful para gerenciamento de tarefas (ToDo), desenvolvida com **DDD, Clean Architecture e SOLID**.
 
 ---
 
-## 📌 Descrição
+## 📌 Funcionalidades
 
-Esta API permite criar, consultar, atualizar e remover tarefas, garantindo regras de negócio consistentes e separação de responsabilidades entre as camadas da aplicação.
+- Criar, listar, atualizar e remover tarefas
+- Filtrar por status e data de vencimento
 
 ---
 
@@ -22,24 +23,21 @@ O projeto segue os princípios de:
 ### 📂 Estrutura
 
 ```
-TaskManager.API           → Camada de apresentação (Controllers, Swagger)
-TaskManager.Application   → Casos de uso (Services, DTOs)
-TaskManager.Domain        → Regras de negócio (Entities, Enums)
-TaskManager.Infrastructure→ Persistência (EF Core, Repositories, UoW)
-TaskManager.Tests         → Testes unitários e integração
+TaskManager.API            → Controllers / Swagger
+TaskManager.Application    → Services / DTOs
+TaskManager.Domain         → Regras de negócio
+TaskManager.Infrastructure → EF Core / Repositories / UoW
+TaskManager.Tests          → Testes
 ```
 
 ---
 
 ## ⚙️ Tecnologias
 
-- .NET 8
-- ASP.NET Core Web API
+- .NET 8 / ASP.NET Core
 - Entity Framework Core (SQLite)
-- xUnit
-- Moq
-- FluentAssertions
-- Swagger (OpenAPI)
+- xUnit, Moq, FluentAssertions
+- Swagger
 - Docker
 
 ---
@@ -54,124 +52,63 @@ A aplicação utiliza **SQLite** como banco de dados relacional, escolhido por s
 
 O banco é criado automaticamente via **Entity Framework Core Migrations** ao iniciar a aplicação.
 
-> 📌 Observação: Em um cenário de produção, o SQLite pode ser substituído por bancos mais robustos como SQL Server ou PostgreSQL sem impacto na camada de domínio, devido à separação de responsabilidades adotada na arquitetura.
-
 ---
 
-## 📦 Funcionalidades
+## 🚀 Como rodar
 
-- Criar tarefa
-- Listar tarefas
-- Filtrar por status e data
-- Atualizar tarefa
-- Remover tarefa
+### ▶️ Local
 
----
-
-## 🧾 Modelo de Tarefa
-
-```json
-{
-  "id": "guid",
-  "title": "string",
-  "description": "string",
-  "status": "Pending | InProgress | Done",
-  "dueDate": "datetime"
-}
-```
-
----
-
-## 🚀 Como rodar o projeto
-
-### 🔹 Pré-requisitos
-
-- .NET 8 SDK
-- Docker (opcional)
-
----
-
-### ▶️ Rodar localmente
-
-```bash
+```bash id="9m1n7r"
 dotnet restore
 dotnet build
 dotnet run --project TaskManager.API
 ```
 
----
-
-### 🌐 Acessar Swagger
+Swagger:
 
 ```
 http://localhost:8080/swagger
 ```
 
-ou
-
-```
-http://localhost:5000/swagger
-```
-
 ---
 
-## 🧪 Executar testes
+### 🐳 Docker
 
-```bash
-dotnet test
-```
-
----
-
-## 🐳 Rodar com Docker
-
-### Build da imagem
-
-```bash
+```bash id="y5bq7u"
 docker build -t taskmanager-api .
-```
-
-### Rodar container
-
-```bash
 docker run -d -p 8080:8080 taskmanager-api
 ```
 
-### Acessar
+Swagger:
 
 ```
 http://localhost:8080/swagger
+```
+
+---
+
+## 🧪 Testes
+
+```bash id="r3p6hz"
+dotnet test
 ```
 
 ---
 
 ## 🧠 Regras de Negócio
 
-- Título não pode ser vazio
-- Data de vencimento não pode ser no passado
-- Status segue fluxo:
-  - Pending → InProgress → Done
-
----
-
-## 🧪 Testes
-
-O projeto possui cobertura de testes para:
-
-- Entidades (Domain)
-- Services (Application)
-- Controllers (Integração)
+- Título obrigatório
+- Data não pode ser no passado
+- Fluxo: Pending → InProgress → Done
 
 ---
 
 ## 📈 Diferenciais
 
-- Arquitetura limpa e escalável
-- Separação de camadas (DDD)
-- Uso de Repository + UnitOfWork
-- Testes unitários e de integração
-- Swagger documentado
-- Pronto para deploy com Docker
+- DDD + Clean Architecture
+- Repository + UnitOfWork
+- Testes unitários e integração
+- Pronto para Docker
 
 ---
 
