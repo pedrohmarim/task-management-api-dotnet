@@ -10,6 +10,11 @@ namespace TaskManager.Application.Services
         private readonly ITaskRepository _repository = repository;
         private readonly IUnitOfWork _unitOfWork = unitOfWork;
 
+        // Em cenários mais complexos, poderia ser adotado um UnitOfWork específico por módulo,
+        // onde o service dependeria de uma única abstração (ex: TaskUnitOfWork → TaskRepository).
+        // Neste projeto, foi utilizado IUnitOfWork genérico + repositories injetados
+        // para manter simplicidade e evitar overengineering.
+
         public async Task<Guid> CreateAsync(CreateTaskRequestDto request)
         {
             var task = new TaskItem(request.Title, request.Description, request.DueDate);

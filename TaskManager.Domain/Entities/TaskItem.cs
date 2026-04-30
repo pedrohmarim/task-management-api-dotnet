@@ -30,6 +30,19 @@ namespace TaskManager.Domain.Entities
             DueDate = dueDate;
         }
 
+        // Os métodos (Start e Complete) foram implementados na entidade
+        // para garantir as regras de negócio (fluxo válido de status: Pending → InProgress → Done).
+        //
+        // Em um cenário mais completo, poderiam ser expostos endpoints específicos na API,
+        // como:
+        // POST /tasks/{id}/start
+        // POST /tasks/{id}/complete
+        //
+        // permitindo alterar o status de forma explícita e alinhada ao domínio.
+        //
+        // Mas para esse projeto, esses métodos foram utilizados apenas nos testes,
+        // mantendo a API mais simples conforme o desafio :)
+
         public void Start()
         {
             if (Status != TaskStatusEnum.Pending)
