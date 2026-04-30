@@ -44,6 +44,20 @@ TaskManager.Tests         → Testes unitários e integração
 
 ---
 
+## 🗄️ Banco de Dados
+
+A aplicação utiliza **SQLite** como banco de dados relacional, escolhido por sua simplicidade e facilidade de execução local, sem necessidade de instalação de servidor.
+
+- Ideal para ambientes de desenvolvimento e testes
+- Banco baseado em arquivo (`.db`)
+- Configuração leve e rápida
+
+O banco é criado automaticamente via **Entity Framework Core Migrations** ao iniciar a aplicação.
+
+> 📌 Observação: Em um cenário de produção, o SQLite pode ser substituído por bancos mais robustos como SQL Server ou PostgreSQL sem impacto na camada de domínio, devido à separação de responsabilidades adotada na arquitetura.
+
+---
+
 ## 📦 Funcionalidades
 
 - Criar tarefa
