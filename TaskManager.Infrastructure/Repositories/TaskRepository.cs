@@ -28,9 +28,9 @@ namespace TaskManager.Infrastructure.Repositories
             return await query.ToListAsync();
         }
 
-        public async Task<TaskItem> GetByIdAsync(Guid id)
+        public async Task<TaskItem?> GetByIdAsync(Guid id)
         {
-            return await _context.Tasks.FindAsync(id) ?? throw new Exception("Task not found");
+            return await _context.Tasks.FindAsync(id);
         }
 
         public void Remove(TaskItem task)

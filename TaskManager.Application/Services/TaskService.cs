@@ -58,7 +58,7 @@ namespace TaskManager.Application.Services
 
         public async Task UpdateAsync(Guid id, CreateTaskRequestDto request)
         {
-            var task = await _repository.GetByIdAsync(id);
+            var task = await _repository.GetByIdAsync(id) ?? throw new Exception("Task not found");
 
             task.Update(request.Title, request.Description, request.DueDate);
 
@@ -69,7 +69,7 @@ namespace TaskManager.Application.Services
 
         public async Task DeleteAsync(Guid id)
         {
-            var task = await _repository.GetByIdAsync(id);
+            var task = await _repository.GetByIdAsync(id) ?? throw new Exception("Task not found");
 
             _repository.Remove(task);
 
