@@ -59,7 +59,6 @@ namespace TaskManager.API
                 using var scope = services.CreateScope();
                 var db = scope.ServiceProvider.GetRequiredService<TaskDbContext>();
 
-                db.Database.EnsureCreated();
                 db.Database.Migrate();
             }
             catch (Exception ex)
