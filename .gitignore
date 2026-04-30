@@ -1,9 +1,3 @@
-# =========================
-
-# .NET / Visual Studio
-
-# =========================
-
 bin/
 obj/
 *.user
@@ -11,89 +5,39 @@ obj/
 *.userosscache
 *.sln.docstates
 
-# Rider / VS Code
-
 .vscode/
 .idea/
-
-# =========================
-
-# Logs
-
-# =========================
+.vs/
 
 *.log
-
-# =========================
-
-# OS
-
-# =========================
 
 .DS_Store
 Thumbs.db
 
-# =========================
-
-# Environment files
-
-# =========================
-
 .env
 .env.*
-
-# =========================
-
-# SQLite (IMPORTANTE)
-
-# =========================
 
 *.db
 *.db-shm
 *.db-wal
 
-# =========================
-
-# Secrets
-
-# =========================
-
 secrets.json
 appsettings.*.local.json
-
-# =========================
-
-# Test / Coverage
-
-# =========================
 
 TestResults/
 coverage/
 *.coverage
 *.coveragexml
 
-# =========================
-
-# Docker
-
-# =========================
-
 docker-compose.override.yml
-
-# =========================
-
-# NuGet
-
-# =========================
 
 *.nupkg
 packages/
 
-# =========================
-
-# Build artifacts
-
-# =========================
-
 publish/
 dist/
+
+*.dll
+*.exe
+*.pdb
+*.cache
