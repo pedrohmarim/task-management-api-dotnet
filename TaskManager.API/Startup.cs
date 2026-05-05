@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
 using TaskManager.API.DependencyInjection;
+using TaskManager.API.Middlewares;
 using TaskManager.Infrastructure.Data;
 
 namespace TaskManager.API
@@ -43,6 +44,8 @@ namespace TaskManager.API
         public void Configure(WebApplication app, IServiceProvider services)
         {
             ApplyMigrations(services);
+
+            app.UseMiddleware<ExceptionMiddleware>();
 
             app.UseSwagger();
             app.UseSwaggerUI();

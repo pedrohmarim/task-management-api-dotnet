@@ -1,4 +1,5 @@
 using TaskManager.Domain.Enums;
+using TaskManager.Domain.Exceptions;
 
 namespace TaskManager.Domain.Entities
 {
@@ -30,23 +31,10 @@ namespace TaskManager.Domain.Entities
             DueDate = dueDate;
         }
 
-        // Os métodos (Start e Complete) foram implementados na entidade
-        // para garantir as regras de negócio (fluxo válido de status: Pending → InProgress → Done).
-        //
-        // Em um cenário mais completo, poderiam ser expostos endpoints específicos na API,
-        // como:
-        // POST /tasks/{id}/start
-        // POST /tasks/{id}/complete
-        //
-        // permitindo alterar o status de forma explícita e alinhada ao domínio.
-        //
-        // Mas para esse projeto, esses métodos foram utilizados apenas nos testes,
-        // mantendo a API mais simples conforme o desafio :)
-
         public void Start()
         {
             if (Status != TaskStatusEnum.Pending)
-                throw new InvalidOperationException("Only pending tasks can be started.");
+                throw new ValidationException("Only pending tasks can be started.");
 
             Status = TaskStatusEnum.InProgress;
         }
@@ -54,7 +42,7 @@ namespace TaskManager.Domain.Entities
         public void Complete()
         {
             if (Status != TaskStatusEnum.InProgress)
-                throw new InvalidOperationException("Only tasks in progress can be completed.");
+                throw new ValidationException("Only tasks in progress can be completed.");
 
             Status = TaskStatusEnum.Done;
         }
@@ -62,10 +50,10 @@ namespace TaskManager.Domain.Entities
         private static void Validate(string title, DateTime dueDate)
         {
             if (string.IsNullOrWhiteSpace(title))
-                throw new ArgumentException("Title cannot be empty.");
+                throw new ValidationException("Title cannot be empty.");
 
             if (dueDate.Date < DateTime.UtcNow.Date)
-                throw new ArgumentException("Due date cannot be in the past.");
+                throw new ValidationException("Due date cannot be in the past.");
         }
     }
 }

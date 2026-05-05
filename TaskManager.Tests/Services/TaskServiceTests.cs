@@ -3,256 +3,203 @@ using Moq;
 using TaskManager.Application.DTOs;
 using TaskManager.Application.Services;
 using TaskManager.Domain.Entities;
-using TaskManager.Domain.Enums;
 using TaskManager.Domain.Interfaces;
+using TaskManager.Domain.Exceptions;
 
-namespace TaskManager.Tests.Services;
-
-public class TaskServiceTests
+namespace TaskManager.Tests.Services
 {
-    private readonly Mock<ITaskRepository> _repositoryMock;
-    private readonly Mock<IUnitOfWork> _unitOfWorkMock;
-    private readonly TaskService _service;
-
-    public TaskServiceTests()
+    public class TaskServiceTests
     {
-        _repositoryMock = new Mock<ITaskRepository>();
-        _unitOfWorkMock = new Mock<IUnitOfWork>();
+        private readonly Mock<ITaskRepository> _repositoryMock;
+        private readonly Mock<IUnitOfWork> _unitOfWorkMock;
+        private readonly TaskService _service;
 
-        _service = new TaskService(_repositoryMock.Object, _unitOfWorkMock.Object);
-    }
-
-    [Fact]
-    public async Task CreateAsync_Should_Create_Task_When_Valid()
-    {
-        // =========================
-        // Arrange
-        // =========================
-        var request = new CreateTaskRequestDto
+        public TaskServiceTests()
         {
-            Title = "Task",
-            Description = "Desc",
-            DueDate = DateTime.UtcNow.AddDays(1)
-        };
+            _repositoryMock = new Mock<ITaskRepository>();
+            _unitOfWorkMock = new Mock<IUnitOfWork>();
 
-        // =========================
-        // Act
-        // =========================
-        var result = await _service.CreateAsync(request);
+            _service = new TaskService(_repositoryMock.Object, _unitOfWorkMock.Object);
+        }
 
-        // =========================
-        // Assert
-        // =========================
-        result.Should().NotBe(Guid.Empty);
-
-        _repositoryMock.Verify(r => r.AddAsync(It.IsAny<TaskItem>()), Times.Once);
-        _unitOfWorkMock.Verify(u => u.CommitAsync(), Times.Once);
-    }
-
-    [Fact]
-    public async Task CreateAsync_Should_Throw_When_Title_Is_Empty()
-    {
-        // =========================
-        // Arrange
-        // =========================
-        var request = new CreateTaskRequestDto
+        [Fact]
+        public async Task CreateAsync_Should_Create_Task_When_Valid()
         {
-            Title = "",
-            Description = "Desc",
-            DueDate = DateTime.UtcNow.AddDays(1)
-        };
+            // Arrange
+            var request = new CreateTaskRequestDto
+            {
+                Title = "Task",
+                Description = "Desc",
+                DueDate = DateTime.UtcNow.AddDays(1)
+            };
 
-        // =========================
-        // Act
-        // =========================
-        Func<Task> act = async () => await _service.CreateAsync(request);
+            // Act
+            var result = await _service.CreateAsync(request);
 
-        // =========================
-        // Assert
-        // =========================
-        await act.Should().ThrowAsync<ArgumentException>();
-    }
+            // Assert
+            result.Should().NotBe(Guid.Empty);
 
-    [Fact]
-    public async Task CreateAsync_Should_Throw_When_DueDate_Is_Past()
-    {
-        // =========================
-        // Arrange
-        // =========================
-        var request = new CreateTaskRequestDto
+            _repositoryMock.Verify(r => r.AddAsync(It.IsAny<TaskItem>()), Times.Once);
+            _unitOfWorkMock.Verify(u => u.CommitAsync(), Times.Once);
+        }
+
+        [Fact]
+        public async Task CreateAsync_Should_Throw_ValidationException_When_Title_Is_Empty()
         {
-            Title = "Task",
-            Description = "Desc",
-            DueDate = DateTime.UtcNow.AddDays(-1)
-        };
+            // Arrange
+            var request = new CreateTaskRequestDto
+            {
+                Title = "",
+                Description = "Desc",
+                DueDate = DateTime.UtcNow.AddDays(1)
+            };
 
-        // =========================
-        // Act
-        // =========================
-        Func<Task> act = async () => await _service.CreateAsync(request);
+            // Act
+            Func<Task> act = async () => await _service.CreateAsync(request);
 
-        // =========================
-        // Assert
-        // =========================
-        await act.Should().ThrowAsync<ArgumentException>();
-    }
+            // Assert
+            await act.Should().ThrowAsync<ValidationException>();
+        }
 
-    [Fact]
-    public async Task GetAllAsync_Should_Return_Tasks()
-    {
-        // =========================
-        // Arrange
-        // =========================
-        var tasks = new List<TaskItem>
+        [Fact]
+        public async Task CreateAsync_Should_Throw_ValidationException_When_DueDate_Is_Past()
         {
-            new("Task 1", "Desc", DateTime.UtcNow.AddDays(1)),
-            new("Task 2", "Desc", DateTime.UtcNow.AddDays(2))
-        };
+            // Arrange
+            var request = new CreateTaskRequestDto
+            {
+                Title = "Task",
+                Description = "Desc",
+                DueDate = DateTime.UtcNow.AddDays(-1)
+            };
 
-        _repositoryMock
-            .Setup(r => r.GetAllAsync(null, null))
-            .ReturnsAsync(tasks);
+            // Act
+            Func<Task> act = async () => await _service.CreateAsync(request);
 
-        // =========================
-        // Act
-        // =========================
-        var result = await _service.GetAllAsync(null, null);
+            // Assert
+            await act.Should().ThrowAsync<ValidationException>();
+        }
 
-        // =========================
-        // Assert
-        // =========================
-        result.Should().HaveCount(2);
-    }
-
-    [Fact]
-    public async Task GetAllAsync_Should_Filter_By_Status()
-    {
-        // =========================
-        // Arrange
-        // =========================
-        var tasks = new List<TaskItem>
+        [Fact]
+        public async Task GetAllAsync_Should_Return_Tasks()
         {
-            new("Task 1", "Desc", DateTime.UtcNow.AddDays(1))
-        };
+            // Arrange
+            var tasks = new List<TaskItem>
+            {
+                new("Task 1", "Desc", DateTime.UtcNow.AddDays(1)),
+                new("Task 2", "Desc", DateTime.UtcNow.AddDays(2))
+            };
 
-        _repositoryMock
-            .Setup(r => r.GetAllAsync(TaskStatusEnum.Pending, null))
-            .ReturnsAsync(tasks);
+            _repositoryMock.Setup(r => r.GetAllAsync(null, null)).ReturnsAsync(tasks);
 
-        // =========================
-        // Act
-        // =========================
-        var result = await _service.GetAllAsync(TaskStatusEnum.Pending, null);
+            // Act
+            var result = await _service.GetAllAsync(null, null);
 
-        // =========================
-        // Assert
-        // =========================
-        result.Should().HaveCount(1);
-    }
+            // Assert
+            result.Should().HaveCount(2);
+        }
 
-    [Fact]
-    public async Task UpdateAsync_Should_Update_Task_When_Valid()
-    {
-        // =========================
-        // Arrange
-        // =========================
-        var task = new TaskItem("Old", "Desc", DateTime.UtcNow.AddDays(1));
-
-        _repositoryMock
-            .Setup(r => r.GetByIdAsync(It.IsAny<Guid>()))
-            .ReturnsAsync(task);
-
-        var request = new CreateTaskRequestDto
+        [Fact]
+        public async Task GetByIdAsync_Should_Return_Task_When_Found()
         {
-            Title = "Updated",
-            Description = "Updated Desc",
-            DueDate = DateTime.UtcNow.AddDays(2)
-        };
+            // Arrange
+            var task = new TaskItem("Task", "Desc", DateTime.UtcNow.AddDays(1));
 
-        // =========================
-        // Act
-        // =========================
-        await _service.UpdateAsync(task.Id, request);
+            _repositoryMock.Setup(r => r.GetByIdAsync(task.Id)).ReturnsAsync(task);
 
-        // =========================
-        // Assert
-        // =========================
-        _repositoryMock.Verify(r => r.Update(task), Times.Once);
-        _unitOfWorkMock.Verify(u => u.CommitAsync(), Times.Once);
-    }
+            // Act
+            var result = await _service.GetByIdAsync(task.Id);
 
-    [Fact]
-    public async Task UpdateAsync_Should_Throw_When_Task_Not_Found()
-    {
-        // =========================
-        // Arrange
-        // =========================
-        _repositoryMock
-            .Setup(r => r.GetByIdAsync(It.IsAny<Guid>()))
-            .ReturnsAsync((TaskItem?)null);
+            // Assert
+            result.Id.Should().Be(task.Id);
+        }
 
-        var request = new CreateTaskRequestDto
+        [Fact]
+        public async Task GetByIdAsync_Should_Throw_NotFoundException_When_Not_Found()
         {
-            Title = "Test",
-            Description = "Test",
-            DueDate = DateTime.UtcNow.AddDays(1)
-        };
+            // Arrange
+            _repositoryMock.Setup(r => r.GetByIdAsync(It.IsAny<Guid>())).ReturnsAsync((TaskItem?)null);
 
-        // =========================
-        // Act
-        // =========================
-        Func<Task> act = async () => await _service.UpdateAsync(Guid.NewGuid(), request);
+            // Act
+            Func<Task> act = async () => await _service.GetByIdAsync(Guid.NewGuid());
 
-        // =========================
-        // Assert
-        // =========================
-        await act.Should().ThrowAsync<Exception>()
-                 .WithMessage("Task not found");
-    }
+            // Assert
+            await act.Should().ThrowAsync<NotFoundException>();
+        }
 
-    [Fact]
-    public async Task DeleteAsync_Should_Remove_Task_When_Found()
-    {
-        // =========================
-        // Arrange
-        // =========================
-        var task = new TaskItem("Task", "Desc", DateTime.UtcNow.AddDays(1));
+        [Fact]
+        public async Task UpdateAsync_Should_Update_Task_When_Valid()
+        {
+            // Arrange
+            var task = new TaskItem("Old", "Desc", DateTime.UtcNow.AddDays(1));
 
-        _repositoryMock
-            .Setup(r => r.GetByIdAsync(It.IsAny<Guid>()))
-            .ReturnsAsync(task);
+            _repositoryMock.Setup(r => r.GetByIdAsync(task.Id)).ReturnsAsync(task);
 
-        // =========================
-        // Act
-        // =========================
-        await _service.DeleteAsync(task.Id);
+            var request = new UpdateTaskRequestDto
+            {
+                Title = "Updated",
+                Description = "Updated Desc",
+                DueDate = DateTime.UtcNow.AddDays(2)
+            };
 
-        // =========================
-        // Assert
-        // =========================
-        _repositoryMock.Verify(r => r.Remove(task), Times.Once);
-        _unitOfWorkMock.Verify(u => u.CommitAsync(), Times.Once);
-    }
+            // Act
+            await _service.UpdateAsync(task.Id, request);
 
-    [Fact]
-    public async Task DeleteAsync_Should_Throw_When_Task_Not_Found()
-    {
-        // =========================
-        // Arrange
-        // =========================
-        _repositoryMock
-            .Setup(r => r.GetByIdAsync(It.IsAny<Guid>()))
-            .ReturnsAsync((TaskItem?)null);
+            // Assert
+            _repositoryMock.Verify(r => r.Update(task), Times.Once);
+            _unitOfWorkMock.Verify(u => u.CommitAsync(), Times.Once);
+        }
 
-        // =========================
-        // Act
-        // =========================
-        Func<Task> act = async () => await _service.DeleteAsync(Guid.NewGuid());
+        [Fact]
+        public async Task UpdateAsync_Should_Throw_NotFoundException_When_Task_Not_Found()
+        {
+            // Arrange
+            _repositoryMock
+                .Setup(r => r.GetByIdAsync(It.IsAny<Guid>()))
+                .ReturnsAsync((TaskItem?)null);
 
-        // =========================
-        // Assert
-        // =========================
-        await act.Should().ThrowAsync<Exception>()
-                 .WithMessage("Task not found");
+            var request = new UpdateTaskRequestDto
+            {
+                Title = "Test",
+                Description = "Test",
+                DueDate = DateTime.UtcNow.AddDays(1)
+            };
+
+            // Act
+            Func<Task> act = async () => await _service.UpdateAsync(Guid.NewGuid(), request);
+
+            // Assert
+            await act.Should().ThrowAsync<NotFoundException>();
+        }
+
+        [Fact]
+        public async Task DeleteAsync_Should_Remove_Task_When_Found()
+        {
+            // Arrange
+            var task = new TaskItem("Task", "Desc", DateTime.UtcNow.AddDays(1));
+
+            _repositoryMock
+                .Setup(r => r.GetByIdAsync(task.Id))
+                .ReturnsAsync(task);
+
+            // Act
+            await _service.DeleteAsync(task.Id);
+
+            // Assert
+            _repositoryMock.Verify(r => r.Remove(task), Times.Once);
+            _unitOfWorkMock.Verify(u => u.CommitAsync(), Times.Once);
+        }
+
+        [Fact]
+        public async Task DeleteAsync_Should_Throw_NotFoundException_When_Task_Not_Found()
+        {
+            // Arrange
+            _repositoryMock.Setup(r => r.GetByIdAsync(It.IsAny<Guid>())).ReturnsAsync((TaskItem?)null);
+
+            // Act
+            Func<Task> act = async () => await _service.DeleteAsync(Guid.NewGuid());
+
+            // Assert
+            await act.Should().ThrowAsync<NotFoundException>();
+        }
     }
 }

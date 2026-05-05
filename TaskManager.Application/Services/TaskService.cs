@@ -2,6 +2,7 @@ using TaskManager.Application.DTOs;
 using TaskManager.Domain.Entities;
 using TaskManager.Domain.Enums;
 using TaskManager.Domain.Interfaces;
+using TaskManager.Domain.Exceptions;
 
 namespace TaskManager.Application.Services
 {
@@ -10,20 +11,16 @@ namespace TaskManager.Application.Services
         private readonly ITaskRepository _repository = repository;
         private readonly IUnitOfWork _unitOfWork = unitOfWork;
 
-        // Em cenários mais complexos, poderia ser adotado um UnitOfWork específico por módulo,
-        // onde o service dependeria de uma única abstração (ex: TaskUnitOfWork → TaskRepository).
-        // Neste projeto, foi utilizado IUnitOfWork genérico + repositories injetados
-        // para manter simplicidade e evitar overengineering.
-
-        public async Task<Guid> CreateAsync(CreateTaskRequestDto request)
+        // Uso de UnitOfWork genérico + repositories para simplicidade.
+        // Pode evoluir para UoW por módulo em cenários mais complexos.
+        public async Task<Guid> CreateAsync(CreateTaskRequestDto task)
         {
-            var task = new TaskItem(request.Title, request.Description, request.DueDate);
+            var taskDb = new TaskItem(task.Title, task.Description, task.DueDate);
 
-            await _repository.AddAsync(task);
-
+            await _repository.AddAsync(taskDb);
             await _unitOfWork.CommitAsync();
 
-            return task.Id;
+            return taskDb.Id;
         }
 
         // Em cenários onde a API precisa atender listagens para UI (ex: tabelas com paginação),
@@ -56,20 +53,34 @@ namespace TaskManager.Application.Services
             });
         }
 
-        public async Task UpdateAsync(Guid id, CreateTaskRequestDto request)
+        public async Task<TaskResponseDto> GetByIdAsync(Guid id)
         {
-            var task = await _repository.GetByIdAsync(id) ?? throw new Exception("Task not found");
+            var task = await _repository.GetByIdAsync(id) ?? throw new NotFoundException($"Task with id '{id}' not found");
 
-            task.Update(request.Title, request.Description, request.DueDate);
+            return new TaskResponseDto
+            {
+                Id = task.Id,
+                Title = task.Title,
+                Description = task.Description,
+                Status = task.Status,
+                DueDate = task.DueDate
+            };
+        }
 
-            _repository.Update(task);
+        public async Task UpdateAsync(Guid id, UpdateTaskRequestDto task)
+        {
+            var dbTask = await _repository.GetByIdAsync(id) ?? throw new NotFoundException($"Task with id '{id}' not found");
+
+            dbTask.Update(task.Title, task.Description, task.DueDate);
+
+            _repository.Update(dbTask);
 
             await _unitOfWork.CommitAsync();
         }
 
         public async Task DeleteAsync(Guid id)
         {
-            var task = await _repository.GetByIdAsync(id) ?? throw new Exception("Task not found");
+            var task = await _repository.GetByIdAsync(id) ?? throw new NotFoundException($"Task with id '{id}' not found");
 
             _repository.Remove(task);
 

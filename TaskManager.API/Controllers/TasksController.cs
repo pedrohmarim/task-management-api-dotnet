@@ -16,16 +16,17 @@ namespace TaskManager.API.Controllers
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public async Task<IActionResult> Create([FromBody] CreateTaskRequestDto request)
         {
-            try
-            {
-                var id = await _service.CreateAsync(request);
+            var id = await _service.CreateAsync(request);
+            return CreatedAtAction(nameof(GetById), new { id }, id);
+        }
 
-                return CreatedAtAction(nameof(GetAll), new { id }, id);
-            }
-            catch (ArgumentException ex)
-            {
-                return BadRequest(ex.Message);
-            }
+        [HttpGet("{id}")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public async Task<IActionResult> GetById(Guid id)
+        {
+            var task = await _service.GetByIdAsync(id);
+            return Ok(task);
         }
 
         [HttpGet]
@@ -39,17 +40,10 @@ namespace TaskManager.API.Controllers
         [HttpPut("{id}")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public async Task<IActionResult> Update(Guid id, [FromBody] CreateTaskRequestDto request)
+        public async Task<IActionResult> Update(Guid id, [FromBody] UpdateTaskRequestDto request)
         {
-            try
-            {
-                await _service.UpdateAsync(id, request);
-                return NoContent();
-            }
-            catch (ArgumentException ex)
-            {
-                return BadRequest(ex.Message);
-            }
+            await _service.UpdateAsync(id, request);
+            return NoContent();
         }
 
         [HttpDelete("{id}")]
@@ -57,15 +51,8 @@ namespace TaskManager.API.Controllers
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<IActionResult> Delete(Guid id)
         {
-            try
-            {
-                await _service.DeleteAsync(id);
-                return NoContent();
-            }
-            catch (Exception ex)
-            {
-                return NotFound(ex.Message);
-            }
+            await _service.DeleteAsync(id);
+            return NoContent();
         }
     }
 }
